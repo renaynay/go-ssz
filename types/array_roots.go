@@ -132,7 +132,13 @@ func (a *rootsArraySSZ) Unmarshal(val reflect.Value, typ reflect.Type, input []b
 	i := 0
 	index := startOffset
 	for i < val.Len() {
-		val.Index(i).SetBytes(input[index : index+uint64(32)])
+		if _, ok := val.Index(i).Interface().(Bytes32Array); ok {
+			newArray := Bytes32Array{}
+			copy(newArray[:], input[index:index+uint64(32)])
+			val.Index(i).Set(reflect.ValueOf(newArray))
+		} else {
+			val.Index(i).SetBytes(input[index : index+uint64(32)])
+		}
 		index += uint64(32)
 		i++
 	}
