@@ -8,6 +8,7 @@ go_library(
         "array_roots.go",
         "basic.go",
         "bitlist.go",
+        "bytes32_array.go",
         "determine_size.go",
         "factory.go",
         "helpers.go",
@@ -33,6 +34,7 @@ go_test(
     name = "go_default_test",
     srcs = [
         "array_roots_test.go",
+        "bytes32_array_test.go",
         "helpers_test.go",
         "struct_test.go",
     ],
