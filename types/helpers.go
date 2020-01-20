@@ -133,6 +133,9 @@ func growSliceFromSizeTags(val reflect.Value, sizes []uint64) reflect.Value {
 	if len(sizes) == 0 {
 		return val
 	}
+	if _, ok := val.Interface().(Bytes32Array); ok {
+		return reflect.ValueOf(Bytes32Array{})
+	}
 	finalValue := reflect.MakeSlice(val.Type(), int(sizes[0]), int(sizes[0]))
 	for i := 0; i < int(sizes[0]); i++ {
 		intermediate := growSliceFromSizeTags(finalValue.Index(i), sizes[1:])
