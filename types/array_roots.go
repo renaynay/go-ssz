@@ -63,6 +63,8 @@ func (a *rootsArraySSZ) Root(val reflect.Value, typ reflect.Type, fieldName stri
 			item = toBytes32(res)
 		} else if res, ok := val.Index(i).Interface().([32]byte); ok {
 			item = res
+		} else if res, ok := val.Index(i).Interface().(Bytes32Array); ok {
+			item = res
 		} else {
 			return [32]byte{}, fmt.Errorf("expected array or slice of len 32, received %v", val.Index(i))
 		}
@@ -112,6 +114,8 @@ func (a *rootsArraySSZ) Marshal(val reflect.Value, typ reflect.Type, buf []byte,
 	for i := 0; i < val.Len(); i++ {
 		var item [32]byte
 		if res, ok := val.Index(i).Interface().([32]byte); ok {
+			item = res
+		} else if res, ok := val.Index(i).Interface().(Bytes32Array); ok {
 			item = res
 		} else if res, ok := val.Index(i).Interface().([]byte); ok {
 			item = toBytes32(res)
