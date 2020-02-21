@@ -36,6 +36,83 @@ func MarshalBeaconBlock(bb *ethpb.BeaconBlock) ([]byte, error) {
 	return marshaledOffset, nil
 }
 
-func MarshalBeaconBlockBody(bbb *ethpb.BeaconBlockBody) ([]byte, error) {
+// it would be serialized as:
+//<proposer_index>
+//<signed_header_1.message.slot>
+//<signed_header_1.message.parent_root>
+//<signed_header_1.message.state_root>
+//<signed_header_1.message.body_root>
+//<signed_header_1.signature>
+//<signed_header_2.message.slot>
+//<signed_header_2.message.parent_root>
+//<signed_header_2.message.state_root>
+//<signed_header_2.message.body_root>
+//<signed_header_2.signature>
+func MarshalProposerSlashing(ps *ethpb.ProposerSlashing) ([]byte, error) {
+	bufLen := 0
 
+	marshaledProposerIndex := encode.MarshalUint64(ps.ProposerIndex)
+	bufLen += len(marshaledProposerIndex)
+
+	marshaledHeader1, err := MarshalSignedBeaconBlockHeader(ps.Header_1)
+	if err != nil {
+		return []byte{}, err
+	}
+	bufLen += len(marshaledHeader1)
+
+	marshaledHeader2, err := MarshalSignedBeaconBlockHeader(ps.Header_2)
+	if err != nil {
+		return []byte{}, err
+	}
+	bufLen += len(marshaledHeader2)
+
+	// TODO are the other parts necessary? w/ prefix XXX
+
+	out := make([]byte, bufLen)
+	placeholder := 4
+
+	copy(out[:placeholder], marshaledProposerIndex)
+	placeholder += 4
+
+	copy(out[placeholder:placeholder+len(marshaledHeader1)], marshaledHeader1) // TODO once you know length of marshaled header, then change the range declaration
+	placeholder += len(marshaledHeader1)
+
+	copy(out[placeholder:placeholder + len(marshaledHeader2)], marshaledHeader2)
+
+	return out, nil
 }
+
+func MarshalSignedBeaconBlockHeader(sbbh *ethpb.SignedBeaconBlockHeader) ([]byte, error) {
+	marshaledHeader, err := MarshalBeaconBlockHeader(sbbh.Header)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return append(marshaledHeader, sbbh.Signature...), nil
+}
+
+func MarshalBeaconBlockHeader(head *ethpb.BeaconBlockHeader) ([]byte, error) {
+	marshaledSlot := encode.MarshalUint64(head.Slot)
+
+	bufLen := (4 + len(head.ParentRoot) + len(head.StateRoot) + len(head.BodyRoot))
+	out := make([]byte, bufLen)
+	placeholder := 4
+
+	copy(out[:placeholder], marshaledSlot)
+	placeholder += 4
+
+	copy(out[placeholder:placeholder+len(head.ParentRoot)], head.ParentRoot)
+	placeholder += len(head.ParentRoot)
+
+	copy(out[placeholder:placeholder+len(head.StateRoot)], head.StateRoot)
+	placeholder += len(head.StateRoot)
+
+	copy(out[placeholder:placeholder+len(head.BodyRoot)], head.BodyRoot)
+
+	return out, nil
+}
+
+func MarshalBeaconBlockBody(bbb *ethpb.BeaconBlockBody) ([]byte, error) {
+	return []byte{}, nil // TODO
+}
+
