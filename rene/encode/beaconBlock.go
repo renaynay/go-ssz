@@ -69,10 +69,9 @@ func MarshalProposerSlashing(ps *ethpb.ProposerSlashing) ([]byte, error) {
 	// TODO are the other parts necessary? w/ prefix XXX
 
 	out := make([]byte, bufLen)
-	placeholder := 4
 
+	placeholder := 8
 	copy(out[:placeholder], marshaledProposerIndex)
-	placeholder += 4
 
 	copy(out[placeholder:placeholder+len(marshaledHeader1)], marshaledHeader1) // TODO once you know length of marshaled header, then change the range declaration
 	placeholder += len(marshaledHeader1)
@@ -94,12 +93,11 @@ func MarshalSignedBeaconBlockHeader(sbbh *ethpb.SignedBeaconBlockHeader) ([]byte
 func MarshalBeaconBlockHeader(head *ethpb.BeaconBlockHeader) ([]byte, error) {
 	marshaledSlot := encode.MarshalUint64(head.Slot)
 
-	bufLen := (4 + len(head.ParentRoot) + len(head.StateRoot) + len(head.BodyRoot))
+	bufLen := (8 + len(head.ParentRoot) + len(head.StateRoot) + len(head.BodyRoot))
 	out := make([]byte, bufLen)
-	placeholder := 4
 
+	placeholder := 8
 	copy(out[:placeholder], marshaledSlot)
-	placeholder += 4
 
 	copy(out[placeholder:placeholder+len(head.ParentRoot)], head.ParentRoot)
 	placeholder += len(head.ParentRoot)
