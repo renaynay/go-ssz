@@ -49,11 +49,30 @@ func UnmarshalProposerSlashing(in []byte, ps *ethpb.ProposerSlashing) error {
 }
 
 func UnmarshalSignedBeaconBlockHeader(in []byte, sbbh *ethpb.SignedBeaconBlockHeader) error {
+	rawHeader := in // TODO how to know the length?
+	var header *ethpb.BeaconBlockHeader
+
+	err := UnmarshalBeaconBlockHeader(rawHeader, header)
+	if err != nil {
+		return err
+	}
+	sbbh.Header = header
+
+	sbbh.Signature = in // TODO how to know the length?
 
 	return nil
 }
 
 func UnmarshalBeaconBlockHeader(in []byte, bbh *ethpb.BeaconBlockHeader) error {
+	slot, err := decode.UnmarshalUint64(in[:8])
+	if err != nil {
+		return err
+	}
+	bbh.Slot = slot
+
+	bbh.ParentRoot = in[:] // TODO how to know the length
+	bbh.StateRoot = in[:] // TODO how to know the length
+	bbh.BodyRoot = in[:] // TODO how to know the length
 
 	return nil
 }
